@@ -7,6 +7,7 @@
 class Actor {
 	public: 
 		Actor();
+		~Actor();
 		std::string buffer[BUFFER_SIZE]; 
 
 		// Producer 

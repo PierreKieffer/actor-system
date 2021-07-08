@@ -14,6 +14,12 @@ Actor::Actor(){
 	}
 }; 
 
+Actor::~Actor(){ 
+/* 
+ * Standard destructor
+ * */
+
+}
 
 void Actor::producer(std::string targetBuffer[BUFFER_SIZE],  std::string payload){
 
