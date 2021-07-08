@@ -82,7 +82,7 @@ int main(){
 
 	// actor_2 Consumer Thread, with acknowledgement to actor_1
 	std::thread consumerThread([&](){
-		actor_2.consumer(customConsumerFunc, actor_1.buffer); 
+		actor_2.consumer(customConsumerFunc, actor_1); 
 	});
 
 	consumerThread.join(); 
@@ -94,7 +94,7 @@ Default acknowledgment message value is `__ACK__`.
 
 To use your own acknowledgment message : 
 ```cpp 
-actor_2.consumer(customConsumerFunc, actor_1.buffer, "message received"); 
+actor_2.consumer(customConsumerFunc, actor_1, "message received"); 
 ```
 
 ### Producer 
@@ -115,7 +115,7 @@ int main(){
 	// Producer Thread, to send a message to actor_2
 	std::thread producerThread([&](){
 		std::string payload = "{\"foo\" : \"bar\"}"; 
-		actor_1.producer(actor_2.buffer, payload);
+		actor_1.producer(actor_2, payload);
 	});
 
 	producerThread.join(); 
@@ -155,7 +155,7 @@ int main(){
 
 	// actor_2 Consumer Thread, with acknowledgment to actor_1
 	std::thread actor_2ConsumerThread([&](){
-		actor_2.consumer(actor_2CustomConsumerFunc, actor_1.buffer, "ack from actor_2"); 
+		actor_2.consumer(actor_2CustomConsumerFunc, actor_1, "ack from actor_2"); 
 	});
 
 	// actor_1 Consumer Thread
@@ -166,7 +166,7 @@ int main(){
 	// actor_1 Producer Thread
 	std::thread actor_1ProducerThread([&](){
 		std::string payload = "{\"foo\" : \"bar\"}"; 
-		actor_1.producer(actor_2.buffer, payload);
+		actor_1.producer(actor_2, payload);
 	});
 
 

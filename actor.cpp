@@ -11,30 +11,32 @@ Actor::Actor(){
 
 	for (int i=0; i < BUFFER_SIZE ; i++){
 		buffer[i] = __EMPTY_REGISTER__; 
-	}
+	};
 }; 
 
 Actor::~Actor(){ 
 /* 
  * Standard destructor
  * */
-
 }
 
-void Actor::producer(std::string targetBuffer[BUFFER_SIZE],  std::string payload){
+
+void Actor::producer(Actor &targetActor,  std::string payload){
 
 /* 
  * Start Actor producer 
  * Send a message to another actor by pushing a payload in the buffer of the targeted actor
  * */
 
-	while(targetBuffer[0] != __EMPTY_REGISTER__) {
+	while(targetActor.buffer[0] != __EMPTY_REGISTER__) {
 		// Waiting for the target buffer register to be free
 		sleep(0.1);
 	};
 
-	if (targetBuffer[0] == __EMPTY_REGISTER__){
-		targetBuffer[0] = payload; 
+	if (targetActor.buffer[0] == __EMPTY_REGISTER__){
+		targetActor.lock.lock(); 
+		targetActor.buffer[0] = payload; 
+		targetActor.lock.unlock(); 
 	}; 
 
 }; 
@@ -46,16 +48,18 @@ void Actor::consumer(std::function<void (std::string)> customConsumer){
  * Consumption of received message buffer, by applying customConsumer function on pull payload
  * */
 	while (true) {
+		lock.lock(); 
 		std::string pullPayload = buffer[BUFFER_SIZE - 1];
 		if (pullPayload != __EMPTY_REGISTER__){
 			customConsumer(pullPayload); 
 		}; 
 		bufferUpdate(); 
+		lock.unlock(); 
 		sleep(0.1);
 	}; 
 }; 
 
-void Actor::consumer(std::function<void (std::string)> customConsumer, std::string ackBuffer[BUFFER_SIZE], std::string ackMessage){
+void Actor::consumer(std::function<void (std::string)> customConsumer, Actor &senderActor, std::string ackMessage){
 
 /* 
  * Start Actor overloaded consumer with acknowledgment message
@@ -63,12 +67,14 @@ void Actor::consumer(std::function<void (std::string)> customConsumer, std::stri
  * Produce back an acknowledgment message
  * */
 	while (true) {
+		lock.lock(); 
 		std::string pullPayload = buffer[BUFFER_SIZE - 1];
 		if (pullPayload != __EMPTY_REGISTER__){
-			customConsumer(pullPayload); 
-			producer(ackBuffer, ackMessage); 
+			customConsumer(pullPayload);
+			producer(senderActor, ackMessage);
 		}; 
 		bufferUpdate(); 
+		lock.unlock(); 
 		sleep(0.1);
 	}; 
 }; 
@@ -80,6 +86,7 @@ void Actor::defaultConsumer(){
  * */
 
 	while (true) {
+		lock.lock(); 
 		std::string pullPayload = buffer[BUFFER_SIZE - 1];
 		if (pullPayload != __EMPTY_REGISTER__){
 			std::stringstream out; 
@@ -87,6 +94,7 @@ void Actor::defaultConsumer(){
 			std::cout << out.str() << std::endl; 
 		}; 
 		bufferUpdate(); 
+		lock.unlock(); 
 		sleep(0.1);
 	}; 
 }; 
