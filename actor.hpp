@@ -12,9 +12,7 @@ class Actor {
 		std::string buffer[BUFFER_SIZE]; 
 		std::mutex lock; 
 
-
 		// Producer 
-/* void producer(std::string targetBuffer[BUFFER_SIZE], std::string inputPayload); */
 		void producer(Actor &targetActor, std::string inputPayload); 
 
 		// Consumer 
